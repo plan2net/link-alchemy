@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="en" datatype="plaintext" original="messages" product-name="link_alchemy">
+        <header/>
+        <body>
+            <trans-unit id="externalLinkChanged">
+                <source>Changed external link '%s' to internal link to %s '%s' (ID %s)!</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>
