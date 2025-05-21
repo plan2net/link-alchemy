@@ -22,6 +22,7 @@ class RteHtmlParser extends \TYPO3\CMS\Core\Html\RteHtmlParser
      * Main entry point for transforming RTE content in the database so the Rich Text Editor can deal with
      * e.g. links.
      */
+    #[\Override]
     public function transformTextForRichTextEditor(string $value, array $processingConfiguration): string
     {
         $this->setProcessingConfiguration($processingConfiguration);
@@ -59,6 +60,7 @@ class RteHtmlParser extends \TYPO3\CMS\Core\Html\RteHtmlParser
         return $value;
     }
 
+    #[\Override]
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function TS_links_db(string $value): string
     {
