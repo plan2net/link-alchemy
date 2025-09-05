@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace FriendsOfTypo3\TtAddress\Tests\Unit\Domain\Model;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Plan2net\LinkAlchemy\Hooks\DataHandlerHook;
 use Plan2net\LinkAlchemy\Service\UrlParser;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
-use TYPO3\TestingFramework\Core\BaseTestCase;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-class DataHanderHookTest extends BaseTestCase
+final class DataHandlerHookTest extends UnitTestCase
 {
     protected function setUp(): void
     {
-        $GLOBALS['TCA']['fakeTable1']['columns']['field_1']['config']['renderType'] = 'inputLink';
-        $GLOBALS['TCA']['fakeTable1']['columns']['field_2']['config']['type'] = 'somethingElse';
-        $GLOBALS['TCA']['fakeTable2']['columns']['field_3']['config']['renderType'] = 'inputLink';
+        $GLOBALS['TCA']['fakeTable1']['columns']['field_1']['config']['type'] = 'link';
+        $GLOBALS['TCA']['fakeTable2']['columns']['field_3']['config']['type'] = 'link';
 
         parent::setUp();
     }
@@ -26,11 +27,8 @@ class DataHanderHookTest extends BaseTestCase
         parent::tearDown();
     }
 
-    /**
-     * @test
-     *
-     * @dataProvider fieldProcessingWorksDataProvider
-     */
+    #[DataProvider('fieldProcessingWorksDataProvider')]
+    #[Test]
     public function fieldProcessingWorks(string $tableName, string $fieldName, $fieldValue, bool $expected): void
     {
         $subject = $this->getAccessibleMock(DataHandlerHook::class, null, [], '', false);
@@ -52,9 +50,7 @@ class DataHanderHookTest extends BaseTestCase
         ];
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function urlParserIsCalled(): void
     {
         $mockedUrlParser = $this->getAccessibleMock(UrlParser::class, ['parse'], [], '', false);

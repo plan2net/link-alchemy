@@ -8,7 +8,7 @@ use Plan2net\LinkAlchemy\Service\UrlParser;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-final class DataHandlerHook
+class DataHandlerHook
 {
     protected UrlParser $urlParser;
 
