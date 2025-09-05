@@ -5,15 +5,11 @@ declare(strict_types=1);
 namespace Plan2net\LinkAlchemy\Hooks;
 
 use Plan2net\LinkAlchemy\Service\UrlParser;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-final class DataHandlerHook implements LoggerAwareInterface
+final class DataHandlerHook
 {
-    use LoggerAwareTrait;
-
     protected UrlParser $urlParser;
 
     public function __construct()

@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace Plan2net\LinkAlchemy\Service;
 
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Http\ServerRequest;
+use TYPO3\CMS\Core\LinkHandling\Exception\UnknownLinkHandlerException;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
+use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Routing\PageRouter;
 use TYPO3\CMS\Core\Routing\SiteMatcher;
 use TYPO3\CMS\Core\Routing\SiteRouteResult;
 use TYPO3\CMS\Core\SingletonInterface;
+use TYPO3\CMS\Core\Site\Entity\NullSite;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -20,8 +26,16 @@ use TYPO3\CMS\Core\Routing\RouteNotFoundException;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
-class UrlParser implements SingletonInterface
+class UrlParser implements SingletonInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
+    private readonly ResourceFactory $resourceFactory;
+
+    public function __construct() {
+        $this->resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+    }
+
     public function parse(string $uri): ?string
     {
         $fakeHttpRequest = $this->getFakeHttpRequest($uri);
@@ -41,17 +55,39 @@ class UrlParser implements SingletonInterface
         }
 
         try {
-            $pageUri = $this->getPageUri($site, $fakeHttpRequest, $siteRouteResult,
-                $uri);
+            $pageUri = $this->getPageUri(
+                $site,
+                $fakeHttpRequest,
+                $siteRouteResult,
+                $uri
+            );
             if (null !== $pageUri) {
                 return $pageUri;
             }
-        } catch (RouteNotFoundException $e) {
+        } catch (RouteNotFoundException|UnknownLinkHandlerException $e) {
+            /** @psalm-suppress InternalMethod */
+            if (!$this->fileExists($fakeHttpRequest->getUri()->getPath())) {
+                /** @psalm-suppress InternalMethod */
+                $this->logger->warning($e->getMessage(), [$fakeHttpRequest->getUri()->getPath()]);
+            }
+
+            /** @psalm-suppress InternalMethod */
+            $fileResourceUri = $this->getFileResourceUri(
+                $fakeHttpRequest->getUri()->getPath(),
+                $uri,
+            );
+
+            if (null !== $fileResourceUri) {
+                return $fileResourceUri;
+            }
         }
 
         return null;
     }
 
+    /**
+     * @throws UnknownLinkHandlerException
+     */
     private function buildPageUrl(SiteRouteResult $routeResult, PageArguments $pageResult): string
     {
         $language = $routeResult->getLanguage()->getLanguageId();
@@ -66,12 +102,14 @@ class UrlParser implements SingletonInterface
                 . (($language || $query) && $arguments ? '&' : '') . http_build_query($arguments),
             'fragment' => $routeResult->getUri()->getFragment(),
         ];
-        // don't add page type 0 as we don't want type=0 in the URL
-        if ('' !== $pageResult->getPageType() && '0' !== $pageResult->getPageType()) {
+        if (!empty($pageResult->getPageType())) {
             $linkInformation['pagetype'] = $pageResult->getPageType();
         }
 
-        return GeneralUtility::makeInstance(LinkService::class)->asString($linkInformation);
+        /** @var LinkService $linkService */
+        $linkService = GeneralUtility::makeInstance(LinkService::class);
+
+        return $linkService->asString($linkInformation);
     }
 
     private function informUserOfChange(string $url, int $id, string $type): void
@@ -80,8 +118,11 @@ class UrlParser implements SingletonInterface
 
         /** @var FlashMessage $message */
         $message = GeneralUtility::makeInstance(FlashMessage::class,
-            LocalizationUtility::translate('externalLinkChanged', 'uri2link',
-                [$url, $type, $pageRecord['title'], $id]),
+            LocalizationUtility::translate(
+                'externalLinkChanged',
+                'link_alchemy',
+                [$url, $type, $pageRecord['title'], $id]
+            ),
             '',
             ContextualFeedbackSeverity::INFO,
             true
@@ -115,34 +156,73 @@ class UrlParser implements SingletonInterface
         /** @var SiteRouteResult $siteRouteResult */
         /** @psalm-suppress InternalMethod */
         $siteRouteResult = $matcher->matchRequest($fakeHttpRequest);
-
         /** @psalm-suppress UndefinedInterfaceMethod */
         $site = $siteRouteResult->getSite();
-        // Return no result for a NullSite (external URLs)
-        if ('#NULL' !== $site->getIdentifier()) {
-            return $siteRouteResult;
+
+        // Return no result for a NullSite (external URL)
+        if ($site instanceof NullSite) {
+            return null;
         }
 
-        return null;
+        return $siteRouteResult;
     }
 
     /**
-     * @throws RouteNotFoundException
+     * @throws RouteNotFoundException|UnknownLinkHandlerException
      */
     private function getPageUri(
         Site $site,
         ServerRequest $fakeHttpRequest,
         SiteRouteResult $siteRouteResult,
-        string $fieldValue,
+        string $url,
     ): ?string {
         /** @var PageRouter $pageRouter */
         $pageRouter = GeneralUtility::makeInstance(PageRouter::class, $site);
         /** @var PageArguments $pageRouteResult */
         $pageRouteResult = $pageRouter->matchRequest($fakeHttpRequest, $siteRouteResult);
 
-        $this->informUserOfChange($fieldValue, $pageRouteResult->getPageId(),
-            LinkService::TYPE_PAGE);
+        $this->informUserOfChange(
+            $url,
+            $pageRouteResult->getPageId(),
+            LinkService::TYPE_PAGE
+        );
 
         return $this->buildPageUrl($siteRouteResult, $pageRouteResult);
+    }
+
+    private function getFileResourceUri(
+        string $pathToResource,
+        string $url,
+    ): ?string {
+        try {
+            $fileResource = $this->resourceFactory->getFileObjectFromCombinedIdentifier($pathToResource);
+
+            if (null === $fileResource) {
+                return null;
+            }
+
+            $this->informUserOfChange(
+                $url,
+                $fileResource->getUid(),
+                LinkService::TYPE_FILE
+            );
+
+            return GeneralUtility::makeInstance(LinkService::class)->asString([
+                'type' => LinkService::TYPE_FILE,
+                'file' => $fileResource
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            // File exists, but doesn't have identifier.
+            /** @psalm-suppress InternalMethod */
+            $this->logger->warning($e->getMessage(), [$pathToResource]);
+
+            return null;
+        }
+    }
+
+    private function fileExists(string $pathToResource): bool
+    {
+        /** @psalm-suppress InternalMethod */
+        return file_exists(Environment::getPublicPath() . $pathToResource);
     }
 }
