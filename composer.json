@@ -1,7 +1,7 @@
 {
   "name": "plan2net/link-alchemy",
   "type": "typo3-cms-extension",
-  "version": "13.0.0",
+  "version": "12.1.0",
   "description": "Rewrite absolute URLs that point to internal pages/files, converting them to internal TYPO3 URLs",
   "license": [
     "GPL-2.0-or-later"
@@ -10,7 +10,7 @@
     "TYPO3 CMS"
   ],
   "require": {
-    "typo3/cms-core": "^13.4"
+    "typo3/cms-core": "^12.4 || ^13.4"
   },
   "autoload": {
     "psr-4": {
