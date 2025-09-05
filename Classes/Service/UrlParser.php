@@ -65,20 +65,31 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
                 return $pageUri;
             }
         } catch (RouteNotFoundException|UnknownLinkHandlerException $e) {
+            $pathToResource = $fakeHttpRequest->getUri()->getPath();
+
             /** @psalm-suppress InternalMethod */
-            if (!$this->fileExists($fakeHttpRequest->getUri()->getPath())) {
+            if ($this->fileExists($pathToResource)) {
+                /** @psalm-suppress InternalMethod */
+                $fileResourceUri = $this->getFileResourceUri(
+                    $pathToResource,
+                    $uri,
+                );
+
+                if (null !== $fileResourceUri) {
+                    return $fileResourceUri;
+                }
+            } elseif ($this->folderExists($pathToResource)) {
+                $folderResourceUri = $this->getFolderResourceUri(
+                    $pathToResource,
+                    $uri,
+                );
+
+                if (null !== $folderResourceUri) {
+                    return $folderResourceUri;
+                }
+            } else {
                 /** @psalm-suppress InternalMethod */
                 $this->logger->warning($e->getMessage(), [$fakeHttpRequest->getUri()->getPath()]);
-            }
-
-            /** @psalm-suppress InternalMethod */
-            $fileResourceUri = $this->getFileResourceUri(
-                $fakeHttpRequest->getUri()->getPath(),
-                $uri,
-            );
-
-            if (null !== $fileResourceUri) {
-                return $fileResourceUri;
             }
         }
 
@@ -112,16 +123,20 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
         return $linkService->asString($linkInformation);
     }
 
-    private function informUserOfChange(string $url, int $id, string $type): void
+    private function informUserOfChange(string $url, int $id, string $type, string $internalResourceName): void
     {
-        $pageRecord = BackendUtility::getRecord('pages', $id, 'title');
+        $messageTranslationKey = match($type) {
+            LinkService::TYPE_PAGE => 'externalPageLinkChanged',
+            LinkService::TYPE_FILE => 'externalFileLinkChanged',
+            LinkService::TYPE_FOLDER => 'externalFolderLinkChanged',
+        };
 
         /** @var FlashMessage $message */
         $message = GeneralUtility::makeInstance(FlashMessage::class,
             LocalizationUtility::translate(
-                'externalLinkChanged',
+                $messageTranslationKey,
                 'link_alchemy',
-                [$url, $type, $pageRecord['title'], $id]
+                [$url, $internalResourceName, $id]
             ),
             '',
             ContextualFeedbackSeverity::INFO,
@@ -181,10 +196,13 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
         /** @var PageArguments $pageRouteResult */
         $pageRouteResult = $pageRouter->matchRequest($fakeHttpRequest, $siteRouteResult);
 
+        $pageRecord = BackendUtility::getRecord('pages', $pageRouteResult->getPageId(), 'title');
+
         $this->informUserOfChange(
             $url,
             $pageRouteResult->getPageId(),
-            LinkService::TYPE_PAGE
+            LinkService::TYPE_PAGE,
+            $pageRecord['title'],
         );
 
         return $this->buildPageUrl($siteRouteResult, $pageRouteResult);
@@ -204,7 +222,8 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
             $this->informUserOfChange(
                 $url,
                 $fileResource->getUid(),
-                LinkService::TYPE_FILE
+                LinkService::TYPE_FILE,
+                $fileResource->getName()
             );
 
             return GeneralUtility::makeInstance(LinkService::class)->asString([
@@ -220,9 +239,46 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
         }
     }
 
+    private function getFolderResourceUri(
+        string $pathToResource,
+        string $url,
+    ): ?string {
+        try {
+            $folderResource = $this->resourceFactory->getFolderObjectFromCombinedIdentifier($pathToResource);
+
+            if (null === $folderResource) {
+                return null;
+            }
+
+            $this->informUserOfChange(
+                $url,
+                $folderResource->getStorage()->getUid(),
+                LinkService::TYPE_FOLDER,
+                $folderResource->getName()
+            );
+
+            return GeneralUtility::makeInstance(LinkService::class)->asString([
+                'type' => LinkService::TYPE_FOLDER,
+                'folder' => $folderResource
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            // File exists, but doesn't have identifier.
+            /** @psalm-suppress InternalMethod */
+            $this->logger->warning($e->getMessage(), [$pathToResource]);
+
+            return null;
+        }
+    }
+
     private function fileExists(string $pathToResource): bool
     {
         /** @psalm-suppress InternalMethod */
-        return file_exists(Environment::getPublicPath() . $pathToResource);
+        return is_file(Environment::getPublicPath() . $pathToResource);
+    }
+
+    private function folderExists(string $pathToResource): bool
+    {
+        /** @psalm-suppress InternalMethod */
+        return is_dir(Environment::getPublicPath() . $pathToResource);
     }
 }
