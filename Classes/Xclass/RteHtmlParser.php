@@ -44,11 +44,11 @@ class RteHtmlParser extends \TYPO3\CMS\Core\Html\RteHtmlParser
         }
 
         /**
-         *  START customization
+         *  START customization.
          */
         $value = $this->internalLinkTransformation->transform($value, $this);
         /**
-         *  END customization
+         *  END customization.
          */
 
         // If an exit HTML cleaner was configured, pass the content through the HTMLcleaner

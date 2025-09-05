@@ -18,7 +18,7 @@ final class InternalLinkTransformation
     }
 
     /**
-     * Transform an external URL that links to a page into an internal link of the form t3://page
+     * Transform an external URL that links to a page into an internal link of the form t3://page.
      */
     public function transform(string $value, RteHtmlParser $parser): string
     {
@@ -26,7 +26,7 @@ final class InternalLinkTransformation
 
         foreach ($contentBlocks as $index => $anchorTag) {
             // Every second array element is a link
-            if (!((int) $index % 2)) {
+            if (!((int)$index % 2)) {
                 continue;
             }
 
@@ -36,7 +36,7 @@ final class InternalLinkTransformation
             }
 
             $parsedUri = $this->urlParser->parse($tagAttributes['href']);
-            if (null !== $parsedUri) {
+            if ($parsedUri !== null) {
                 $tagAttributes['href'] = $parsedUri;
                 $contentBlocks[$index] = $this->generateAttribute($tagAttributes, $parser, $anchorTag);
             }
@@ -53,6 +53,6 @@ final class InternalLinkTransformation
 
     private function hasProtocol(string $href): bool
     {
-        return (bool) preg_match('|^[a-z]+://|', $href);
+        return (bool)preg_match('|^[a-z]+://|', $href);
     }
 }

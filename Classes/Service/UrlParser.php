@@ -6,24 +6,24 @@ namespace Plan2net\LinkAlchemy\Service;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\LinkHandling\Exception\UnknownLinkHandlerException;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
+use TYPO3\CMS\Core\Messaging\FlashMessage;
+use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Routing\PageRouter;
+use TYPO3\CMS\Core\Routing\RouteNotFoundException;
 use TYPO3\CMS\Core\Routing\SiteMatcher;
 use TYPO3\CMS\Core\Routing\SiteRouteResult;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Site\Entity\NullSite;
 use TYPO3\CMS\Core\Site\Entity\Site;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Messaging\FlashMessage;
-use TYPO3\CMS\Core\Messaging\FlashMessageService;
-use TYPO3\CMS\Core\Routing\RouteNotFoundException;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 class UrlParser implements SingletonInterface, LoggerAwareInterface
@@ -32,7 +32,8 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
 
     private readonly ResourceFactory $resourceFactory;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
     }
 
@@ -61,10 +62,11 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
                 $siteRouteResult,
                 $uri
             );
-            if (null !== $pageUri) {
+            if ($pageUri !== null) {
                 return $pageUri;
             }
         } catch (RouteNotFoundException|UnknownLinkHandlerException $e) {
+            /** @psalm-suppress InternalMethod */
             $pathToResource = $fakeHttpRequest->getUri()->getPath();
 
             /** @psalm-suppress InternalMethod */
@@ -75,7 +77,7 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
                     $uri,
                 );
 
-                if (null !== $fileResourceUri) {
+                if ($fileResourceUri !== null) {
                     return $fileResourceUri;
                 }
             } elseif ($this->folderExists($pathToResource)) {
@@ -84,7 +86,7 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
                     $uri,
                 );
 
-                if (null !== $folderResourceUri) {
+                if ($folderResourceUri !== null) {
                     return $folderResourceUri;
                 }
             } else {
@@ -102,7 +104,7 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
     private function buildPageUrl(SiteRouteResult $routeResult, PageArguments $pageResult): string
     {
         $language = $routeResult->getLanguage()->getLanguageId();
-        $language = (0 !== $language ? 'L=' . $language : '');
+        $language = ($language !== 0 ? 'L=' . $language : '');
         $query = $routeResult->getUri()->getQuery();
         $arguments = $pageResult->getArguments();
         $linkInformation = [
@@ -125,7 +127,7 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
 
     private function informUserOfChange(string $url, int $id, string $type, string $internalResourceName): void
     {
-        $messageTranslationKey = match($type) {
+        $messageTranslationKey = match ($type) {
             LinkService::TYPE_PAGE => 'externalPageLinkChanged',
             LinkService::TYPE_FILE => 'externalFileLinkChanged',
             LinkService::TYPE_FOLDER => 'externalFolderLinkChanged',
@@ -215,7 +217,7 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
         try {
             $fileResource = $this->resourceFactory->getFileObjectFromCombinedIdentifier($pathToResource);
 
-            if (null === $fileResource) {
+            if ($fileResource === null) {
                 return null;
             }
 
@@ -246,7 +248,7 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
         try {
             $folderResource = $this->resourceFactory->getFolderObjectFromCombinedIdentifier($pathToResource);
 
-            if (null === $folderResource) {
+            if ($folderResource === null) {
                 return null;
             }
 

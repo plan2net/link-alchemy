@@ -18,18 +18,19 @@ final class DataHandlerHook
     }
 
     /**
-     * Fill path_segment/slug field with title
+     * Fill path_segment/slug field with title.
      *
      * @param string     $status
      * @param string     $table
      * @param string|int $id
      */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName
     public function processDatamap_postProcessFieldArray($status, $table, $id, array &$fieldArray, DataHandler $parentObject): void
     {
         foreach ($fieldArray as $fieldName => $fieldValue) {
             if ($this->fieldShouldBeProcessed($table, $fieldName, $fieldValue)) {
                 $parsedUri = $this->urlParser->parse($fieldValue);
-                if (null !== $parsedUri) {
+                if ($parsedUri !== null) {
                     $fieldArray[$fieldName] = $parsedUri;
                 }
             }
