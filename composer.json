@@ -3,7 +3,7 @@
     "description": "Rewrite absolute URLs that point to internal pages/files, converting them to internal TYPO3 URLs",
     "license": "GPL-2.0-or-later",
     "type": "typo3-cms-extension",
-    "version": "12.1.0",
+    "version": "13.1.0",
     "keywords": [
         "TYPO3",
         "extension",
