@@ -1,25 +1,79 @@
 {
-  "name": "plan2net/link-alchemy",
-  "type": "typo3-cms-extension",
-  "version": "13.0.0",
-  "description": "Rewrite absolute URLs that point to internal pages/files, converting them to internal TYPO3 URLs",
-  "license": [
-    "GPL-2.0-or-later"
-  ],
-  "keywords": [
-    "TYPO3 CMS"
-  ],
-  "require": {
-    "typo3/cms-core": "^13.4"
-  },
-  "autoload": {
-    "psr-4": {
-      "Plan2net\\LinkAlchemy\\": "Classes/"
+    "name": "plan2net/link-alchemy",
+    "description": "Rewrite absolute URLs that point to internal pages/files, converting them to internal TYPO3 URLs",
+    "license": "GPL-2.0-or-later",
+    "type": "typo3-cms-extension",
+    "version": "12.1.0",
+    "keywords": [
+        "TYPO3",
+        "extension",
+        "internal-urls",
+        "link",
+        "rte"
+    ],
+    "homepage": "https://www.plan2.net/",
+    "require": {
+        "php": ">=8.1",
+        "typo3/cms-core": "^12.4 || ^13.4"
+    },
+    "require-dev": {
+        "ergebnis/composer-normalize": "^2.48",
+        "friendsofphp/php-cs-fixer": "^3",
+        "slevomat/coding-standard": "^8",
+        "squizlabs/php_codesniffer": "^3",
+        "typo3/testing-framework": "*",
+        "vimeo/psalm": "^5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Plan2net\\LinkAlchemy\\": "Classes/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "ergebnis/composer-normalize": true,
+            "typo3/class-alias-loader": true,
+            "typo3/cms-composer-installers": true
+        }
+    },
+    "extra": {
+        "composer-normalize": {
+            "indent-size": 4,
+            "indent-style": "space"
+        },
+        "typo3/cms": {
+            "extension-key": "link_alchemy"
+        }
+    },
+    "scripts": {
+        "lint": [
+            "@psalm",
+            "@php-cs-fixer",
+            "@php-codesniffer"
+        ],
+        "lint:fix": [
+            "@psalm",
+            "@php-cs-fixer:fix",
+            "@php-codesniffer:fix"
+        ],
+        "php-codesniffer": [
+            "./vendor/bin/phpcs --standard=./Build/php-codesniffer.xml"
+        ],
+        "php-codesniffer:fix": [
+            "./vendor/bin/phpcbf --standard=./Build/php-codesniffer.xml"
+        ],
+        "php-cs-fixer": [
+            "PHP_CS_FIXER_IGNORE_ENV=1 ./vendor/bin/php-cs-fixer --config=./Build/php-cs-fixer.php fix --dry-run -v --diff"
+        ],
+        "php-cs-fixer:fix": [
+            "PHP_CS_FIXER_IGNORE_ENV=1 ./vendor/bin/php-cs-fixer --config=./Build/php-cs-fixer.php fix -v"
+        ],
+        "psalm": [
+            "./vendor/bin/psalm --config=Build/psalm.xml"
+        ],
+        "test": [
+            "./vendor/bin/phpunit Tests"
+        ]
     }
-  },
-  "extra": {
-    "typo3/cms": {
-      "extension-key": "link_alchemy"
-    }
-  }
 }

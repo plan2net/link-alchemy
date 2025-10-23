@@ -3,8 +3,14 @@
     <file source-language="en" target-language="de" datatype="plaintext" original="messages">
         <header/>
         <body>
-            <trans-unit id="externalLinkChanged">
-                <target>Externen Link '%s' auf internen Link zu %s '%s' (ID %s) geändert!</target>
+            <trans-unit id="externalPageLinkChanged">
+                <target>Externen Link '%s' auf internen Link zu Seite '%s' (ID %s) geändert!</target>
+            </trans-unit>
+            <trans-unit id="externalFileLinkChanged">
+                <target>Externen Link '%s' auf internen Link zu Datei '%s' (ID %s) geändert!</target>
+            </trans-unit>
+            <trans-unit id="externalFolderLinkChanged">
+                <target>Externen Link '%s' auf internen Link zu Ordner '%s' (Storage ID %s) geändert!</target>
             </trans-unit>
         </body>
     </file>

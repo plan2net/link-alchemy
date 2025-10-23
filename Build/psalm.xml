@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<psalm resolveFromConfigFile="true"
+       errorLevel="4"
+       cacheDirectory="./.psalm.cache"
+       hideExternalErrors="true"
+       phpVersion="8.2">
+    <projectFiles>
+        <directory name="../Classes"/>
+        <ignoreFiles>
+            <directory name="../vendor" allowMissingFiles="true"/>
+        </ignoreFiles>
+    </projectFiles>
+    <issueHandlers>
+        <InternalProperty errorLevel="suppress" />
+    </issueHandlers>
+</psalm>
