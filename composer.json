@@ -3,7 +3,7 @@
     "description": "Rewrite absolute URLs that point to internal pages/files, converting them to internal TYPO3 URLs",
     "license": "GPL-2.0-or-later",
     "type": "typo3-cms-extension",
-    "version": "13.1.0",
+    "version": "14.0.0",
     "keywords": [
         "TYPO3",
         "extension",
@@ -14,7 +14,7 @@
     "homepage": "https://www.plan2.net/",
     "require": {
         "php": ">=8.1",
-        "typo3/cms-core": "^12.4 || ^13.4"
+        "typo3/cms-core": "^12.4 || ^13.4 || ^14"
     },
     "require-dev": {
         "ergebnis/composer-normalize": "^2.48",
