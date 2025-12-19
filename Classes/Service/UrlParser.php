@@ -37,13 +37,16 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
         $this->resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
     }
 
-    public function parse(string $uri): ?string
+    public function parse(string $uri, ?string $baseUrl = null): ?string
     {
-        $uri = trim($uri);
-
         $splitUri = explode(' ', $uri);
         if (count($splitUri) > 1) {
             $uri = $splitUri[0];
+        }
+
+        if ($baseUrl !== null) {
+            $baseUrl = rtrim($baseUrl, '/');
+            $uri = "{$baseUrl}{$uri}";
         }
 
         $fakeHttpRequest = $this->getFakeHttpRequest($uri);

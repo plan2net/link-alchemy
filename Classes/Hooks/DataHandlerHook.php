@@ -5,16 +5,21 @@ declare(strict_types=1);
 namespace Plan2net\LinkAlchemy\Hooks;
 
 use Plan2net\LinkAlchemy\Service\UrlParser;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class DataHandlerHook
 {
     protected UrlParser $urlParser;
+    protected SiteFinder $siteFinder;
 
     public function __construct()
     {
         $this->urlParser = GeneralUtility::makeInstance(UrlParser::class);
+        $this->siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
     }
 
     /**
@@ -29,7 +34,11 @@ class DataHandlerHook
     {
         foreach ($fieldArray as $fieldName => $fieldValue) {
             if ($this->fieldShouldBeProcessed($table, $fieldName, $fieldValue)) {
-                $parsedUri = $this->urlParser->parse($fieldValue);
+                if (str_starts_with(trim($fieldValue), '/')) {
+                    $baseUrl = $this->getSiteBaseUrl($parentObject, $table, $id);
+                }
+
+                $parsedUri = $this->urlParser->parse($fieldValue, $baseUrl ?? null);
                 if ($parsedUri !== null) {
                     $fieldArray[$fieldName] = $parsedUri;
                 }
@@ -50,12 +59,30 @@ class DataHandlerHook
             return false;
         }
 
-        if (($GLOBALS['TCA'][$tableName]['columns'][$fieldName]['config']['type'] ?? '') === 'link'
-            && (str_starts_with($fieldValue, 'http') || str_starts_with($fieldValue, '/'))
-        ) {
-            return true;
+        if (($GLOBALS['TCA'][$tableName]['columns'][$fieldName]['config']['type'] ?? '') === 'link') {
+            $fieldValue = trim($fieldValue);
+            if (str_starts_with($fieldValue, 'http') || str_starts_with($fieldValue, '/')) {
+                return true;
+            }
         }
 
         return false;
+    }
+
+    protected function getSiteBaseUrl(DataHandler $dataHandler, string $table, int $uid): ?string
+    {
+        $pid = null;
+        $record = BackendUtility::getRecord($table, $uid, 'pid');
+        if (isset($record['pid'])) {
+            $pid = $record['pid'];
+        }
+
+        try {
+            $site = $this->siteFinder->getSiteByPageId($pid);
+
+            return (string)$site->getBase();
+        } catch (SiteNotFoundException) {
+            return null;
+        }
     }
 }
