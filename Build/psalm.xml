@@ -3,7 +3,7 @@
        errorLevel="4"
        cacheDirectory="./.psalm.cache"
        hideExternalErrors="true"
-       phpVersion="8.2">
+       phpVersion="8.1">
     <projectFiles>
         <directory name="../Classes"/>
         <ignoreFiles>
@@ -12,5 +12,9 @@
     </projectFiles>
     <issueHandlers>
         <InternalProperty errorLevel="suppress" />
+        <PossiblyUnusedMethod errorLevel="info"/>
+        <UnusedClass errorLevel="info"/>
+        <MissingOverrideAttribute errorLevel="info"/>
+        <UnnecessaryVarAnnotation errorLevel="info"/>
     </issueHandlers>
 </psalm>

@@ -28,6 +28,8 @@ class DataHandlerHook
      * @param string     $status
      * @param string     $table
      * @param string|int $id
+     *
+     * @psalm-suppress PossiblyUnusedParam
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName
     public function processDatamap_postProcessFieldArray($status, $table, $id, array &$fieldArray, DataHandler $parentObject): void
@@ -69,6 +71,7 @@ class DataHandlerHook
         return false;
     }
 
+    /** @psalm-suppress PossiblyUnusedParam */
     protected function getSiteBaseUrl(DataHandler $dataHandler, string $table, int $uid): ?string
     {
         $pid = null;

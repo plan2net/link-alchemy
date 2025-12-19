@@ -258,6 +258,7 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
         try {
             $folderResource = $this->resourceFactory->getFolderObjectFromCombinedIdentifier($pathToResource);
 
+            /** @psalm-suppress TypeDoesNotContainNull */
             if ($folderResource === null) {
                 return null;
             }
