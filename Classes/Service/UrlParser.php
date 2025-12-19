@@ -39,6 +39,8 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
 
     public function parse(string $uri, ?string $baseUrl = null): ?string
     {
+        $uri = trim($uri);
+
         $splitUri = explode(' ', $uri);
         if (count($splitUri) > 1) {
             $uri = $splitUri[0];
