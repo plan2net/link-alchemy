@@ -39,6 +39,8 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
 
     public function parse(string $uri): ?string
     {
+        $uri = trim($uri);
+
         $fakeHttpRequest = $this->getFakeHttpRequest($uri);
         if (!$fakeHttpRequest instanceof ServerRequest) {
             return null;
