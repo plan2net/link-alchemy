@@ -37,7 +37,7 @@ class DataHandlerHook
         foreach ($fieldArray as $fieldName => $fieldValue) {
             if ($this->fieldShouldBeProcessed($table, $fieldName, $fieldValue)) {
                 if (str_starts_with(trim($fieldValue), '/')) {
-                    $baseUrl = $this->getSiteBaseUrl($parentObject, $table, $id);
+                    $baseUrl = $this->getSiteBaseUrl($table, $id);
                 }
 
                 $parsedUri = $this->urlParser->parse($fieldValue, $baseUrl ?? null);
@@ -71,8 +71,7 @@ class DataHandlerHook
         return false;
     }
 
-    /** @psalm-suppress PossiblyUnusedParam */
-    protected function getSiteBaseUrl(DataHandler $dataHandler, string $table, int $uid): ?string
+    protected function getSiteBaseUrl(string $table, int $uid): ?string
     {
         $pid = null;
         $record = BackendUtility::getRecord($table, $uid, 'pid');
