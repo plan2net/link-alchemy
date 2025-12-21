@@ -73,10 +73,15 @@ class DataHandlerHook
 
     protected function getSiteBaseUrl(string $table, int $uid): ?string
     {
-        $pid = null;
-        $record = BackendUtility::getRecord($table, $uid, 'pid');
-        if (isset($record['pid'])) {
-            $pid = $record['pid'];
+        if ($table === 'pages') {
+            $pid = $uid;
+        } else {
+            $record = BackendUtility::getRecord($table, $uid, 'pid');
+            if (isset($record['pid'])) {
+                $pid = $record['pid'];
+            } else {
+                return null;
+            }
         }
 
         try {
