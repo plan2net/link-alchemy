@@ -10,7 +10,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class InternalLinkTransformation
 {
-    protected UrlParser $urlParser;
+    private UrlParser $urlParser;
 
     public function __construct()
     {
