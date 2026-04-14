@@ -10,6 +10,7 @@ use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\MathUtility;
 
 class DataHandlerHook
 {
@@ -71,8 +72,12 @@ class DataHandlerHook
         return false;
     }
 
-    protected function getSiteBaseUrl(string $table, int $uid): ?string
+    protected function getSiteBaseUrl(string $table, int|string $uid): ?string
     {
+        if (!MathUtility::canBeInterpretedAsInteger($uid)) {
+            return null;
+        }
+
         if ($table === 'pages') {
             $pid = $uid;
         } else {
