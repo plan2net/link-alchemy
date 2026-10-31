@@ -3,7 +3,7 @@
     "description": "Transforms URLs like domain.tld/services to TYPO3 links (t3://) if those are actually internal links to pages, files or folders, in link fields and rich text",
     "license": "GPL-2.0-or-later",
     "type": "typo3-cms-extension",
-    "version": "14.0.2",
+    "version": "14.1.0",
     "keywords": [
         "TYPO3",
         "extension",
