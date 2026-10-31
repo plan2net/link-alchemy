@@ -2,7 +2,7 @@
 
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Link-Alchemy',
-    'description' => 'Rewrite absolute URLs that point to internal pages/files, converting them to internal TYPO3 URLs',
+    'description' => 'Transforms URLs like domain.tld/services to TYPO3 links (t3://) if those are actually internal links to pages, files or folders, in link fields and rich text',
     'category' => 'be',
     'author' => 'Wolfgang Klinger',
     'author_email' => 'office@plan2.net',

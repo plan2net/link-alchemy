@@ -2,9 +2,9 @@
 
 ## What does it do?
 
-The `link_alchemy` extension rewrites absolute links to internal pages, files and folders into TYPO3 links
-(`t3://page...`, `t3://file...`, `t3://folder...`) when a record is saved. It works on TCA `type=link` fields
-and on rich text fields.
+The `link_alchemy` extension transforms URLs like `domain.tld/services` to TYPO3 links (`t3://page...`,
+`t3://file...`, `t3://folder...`) if those are actually internal links. It does this when a record is saved,
+in TCA `type=link` fields and in rich text fields.
 
 ## How it works
 
