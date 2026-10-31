@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Plan2net\LinkAlchemy\RteTransformation;
 
-use Plan2net\LinkAlchemy\Service\UrlParser;
+use Plan2net\LinkAlchemy\ChangeNotifier;
+use Plan2net\LinkAlchemy\LinkResolver;
 use Plan2net\LinkAlchemy\Xclass\RteHtmlParser;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class InternalLinkTransformation
 {
     public function __construct(
-        private readonly UrlParser $urlParser,
+        private readonly LinkResolver $linkResolver,
+        private readonly ChangeNotifier $changeNotifier,
     ) {
     }
 
@@ -33,9 +35,10 @@ final class InternalLinkTransformation
                 continue;
             }
 
-            $parsedUri = $this->urlParser->parse($tagAttributes['href']);
-            if ($parsedUri !== null) {
-                $tagAttributes['href'] = $parsedUri;
+            $link = $this->linkResolver->resolve($tagAttributes['href']);
+            if ($link !== null) {
+                $this->changeNotifier->notify($tagAttributes['href'], $link);
+                $tagAttributes['href'] = $link->uri;
                 $contentBlocks[$index] = $this->generateAttribute($tagAttributes, $parser, $anchorTag);
             }
         }

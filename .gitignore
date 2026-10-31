@@ -1,5 +1,6 @@
 .idea/
 /.php-cs-fixer.cache
+/Build/.psalm.cache/
 /vendor/
 /composer.lock
 # Created by `composer test:e2e:seed`

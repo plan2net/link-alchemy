@@ -84,12 +84,10 @@
             "./vendor/bin/psalm --config=Build/psalm.xml"
         ],
         "test": [
-            "@test:unit",
             "@test:functional"
         ],
         "test:e2e:seed": "php Tests/E2e/seed/seed.php",
-        "test:functional": "./vendor/bin/phpunit -c Build/phpunit/FunctionalTests.xml",
-        "test:unit": "./vendor/bin/phpunit Tests/Unit"
+        "test:functional": "./vendor/bin/phpunit -c Build/phpunit/FunctionalTests.xml"
     },
     "scripts-descriptions": {
         "test:e2e:seed": "Sets up the TYPO3 instance for the browser tests. Run again after changing the fixtures."

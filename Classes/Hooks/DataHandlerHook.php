@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Plan2net\LinkAlchemy\Hooks;
 
-use Plan2net\LinkAlchemy\Service\UrlParser;
+use Plan2net\LinkAlchemy\ChangeNotifier;
+use Plan2net\LinkAlchemy\LinkResolver;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
@@ -14,14 +15,13 @@ use TYPO3\CMS\Core\Utility\MathUtility;
 class DataHandlerHook
 {
     public function __construct(
-        protected readonly UrlParser $urlParser,
+        protected readonly LinkResolver $linkResolver,
+        protected readonly ChangeNotifier $changeNotifier,
         protected readonly SiteFinder $siteFinder,
     ) {
     }
 
     /**
-     * Fill path_segment/slug field with title.
-     *
      * @param string     $status
      * @param string     $table
      * @param string|int $id
@@ -32,15 +32,19 @@ class DataHandlerHook
     public function processDatamap_postProcessFieldArray($status, $table, $id, array &$fieldArray, DataHandler $parentObject): void
     {
         foreach ($fieldArray as $fieldName => $fieldValue) {
-            if ($this->fieldShouldBeProcessed($table, $fieldName, $fieldValue)) {
-                if (str_starts_with(trim($fieldValue), '/')) {
-                    $baseUrl = $this->getSiteBaseUrl($table, $id);
-                }
+            if (!$this->fieldShouldBeProcessed($table, $fieldName, $fieldValue)) {
+                continue;
+            }
 
-                $parsedUri = $this->urlParser->parse($fieldValue, $baseUrl ?? null);
-                if ($parsedUri !== null) {
-                    $fieldArray[$fieldName] = $parsedUri;
-                }
+            $url = explode(' ', trim($fieldValue))[0];
+            if (str_starts_with($url, '/')) {
+                $url = rtrim($this->getSiteBaseUrl($table, $id) ?? '', '/') . $url;
+            }
+
+            $link = $this->linkResolver->resolve($url);
+            if ($link !== null) {
+                $fieldArray[$fieldName] = $link->uri;
+                $this->changeNotifier->notify($url, $link);
             }
         }
     }

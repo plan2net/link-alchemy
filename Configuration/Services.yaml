@@ -6,3 +6,4 @@ services:
 
   Plan2net\LinkAlchemy\:
     resource: '../Classes/*'
+    exclude: '../Classes/ResolvedLink.php'
