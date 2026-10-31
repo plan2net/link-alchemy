@@ -1,0 +1,7 @@
+config.forceAbsoluteUrls = 1
+
+page = PAGE
+page.config.disableAllHeaderCode = 1
+page.10 = TEXT
+page.10.typolink.parameter.data = GP:link
+page.10.typolink.returnLast = url

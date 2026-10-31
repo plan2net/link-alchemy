@@ -68,7 +68,7 @@ class LinkResolver
     private function pageLink(SiteRouteResult $siteRouteResult, PageArguments $pageArguments): ResolvedLink
     {
         $language = $siteRouteResult->getLanguage()->getLanguageId();
-        $language = $language !== 0 ? 'L=' . $language : '';
+        $language = $language !== 0 ? '_language=' . $language : '';
         $query = $siteRouteResult->getUri()->getQuery();
         $arguments = $pageArguments->getArguments();
         $linkInformation = [
