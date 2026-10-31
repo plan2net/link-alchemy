@@ -38,21 +38,6 @@ they are. Paths like `/about` in link fields are resolved against the site of th
 - **Before**: `<a href="https://example.com/internal-page">Link</a>`
 - **After**: `<a href="t3://page?uid=123">Link</a>`
 
-## Internals
-
-- `Plan2net\LinkAlchemy\Hooks\DataHandlerHook` finds link and rich text fields in the data being saved, rewrites
-  their links and tells the editor.
-- `Plan2net\LinkAlchemy\LinkResolver` turns one absolute URL into a `t3://` link, or `null` if it does not point
-  to a page, file or folder of a site. It has no side effects and needs no backend user.
-
-## Tests
-
-```bash
-ddev composer test                               # functional tests
-ddev composer test:e2e:seed                      # set up the TYPO3 instance for the browser tests
-cd Tests/E2e && npm ci && npx playwright test    # browser tests against the real backend
-```
-
 # Acknowledgements
 
 This extension was inspired by [Georg Ringers](https://github.com/georgringer)'s uri2link extension that only
