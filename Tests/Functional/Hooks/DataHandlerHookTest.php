@@ -10,6 +10,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class DataHandlerHookTest extends FunctionalTestCase
 {
@@ -118,7 +119,7 @@ final class DataHandlerHookTest extends FunctionalTestCase
      */
     private function process(array $records): DataHandler
     {
-        $dataHandler = $this->get(DataHandler::class);
+        $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start(['tt_content' => $records], []);
         $dataHandler->process_datamap();
         self::assertSame([], $dataHandler->errorLog);
