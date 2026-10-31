@@ -1,0 +1,15 @@
+<phpunit
+    bootstrap="../../vendor/typo3/testing-framework/Resources/Core/Build/FunctionalTestsBootstrap.php"
+    cacheResult="false"
+    colors="true"
+    displayDetailsOnTestsThatTriggerDeprecations="true"
+>
+    <testsuites>
+        <testsuite name="Functional tests">
+            <directory>../../Tests/Functional/</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="typo3DatabaseDriver" value="pdo_sqlite"/>
+    </php>
+</phpunit>

@@ -1,4 +1,4 @@
-name: e2e
+name: tests
 
 on:
   push:
@@ -9,12 +9,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: e2e-${{ github.ref }}
+  group: tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  e2e:
-    name: e2e (typo3 ${{ matrix.typo3 }}, php ${{ matrix.php }})
+  tests:
+    name: tests (typo3 ${{ matrix.typo3 }}, php ${{ matrix.php }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -59,6 +59,8 @@ jobs:
             "typo3/cms-install:^${{ matrix.typo3 }}" \
             "typo3/cms-rte-ckeditor:^${{ matrix.typo3 }}"
           composer update --no-interaction --no-progress --with-all-dependencies
+
+      - run: composer test
 
       - run: composer test:e2e:seed
 

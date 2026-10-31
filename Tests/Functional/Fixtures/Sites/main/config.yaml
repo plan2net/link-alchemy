@@ -1,0 +1,16 @@
+rootPageId: 1
+base: 'https://link-alchemy.example/'
+identifier: main
+languages:
+  -
+    languageId: 0
+    title: English
+    enabled: true
+    base: /
+    locale: en_US.UTF-8
+  -
+    languageId: 1
+    title: Deutsch
+    enabled: true
+    base: /de/
+    locale: de_DE.UTF-8
