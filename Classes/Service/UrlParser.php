@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Plan2net\LinkAlchemy\Service;
 
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Http\ServerRequest;
@@ -19,22 +18,21 @@ use TYPO3\CMS\Core\Routing\PageRouter;
 use TYPO3\CMS\Core\Routing\RouteNotFoundException;
 use TYPO3\CMS\Core\Routing\SiteMatcher;
 use TYPO3\CMS\Core\Routing\SiteRouteResult;
-use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Site\Entity\NullSite;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
-class UrlParser implements SingletonInterface, LoggerAwareInterface
+class UrlParser
 {
-    use LoggerAwareTrait;
-
-    private readonly ResourceFactory $resourceFactory;
-
-    public function __construct()
-    {
-        $this->resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+    public function __construct(
+        private readonly ResourceFactory $resourceFactory,
+        private readonly SiteMatcher $siteMatcher,
+        private readonly LinkService $linkService,
+        private readonly FlashMessageService $flashMessageService,
+        private readonly LoggerInterface $logger,
+    ) {
     }
 
     public function parse(string $uri, ?string $baseUrl = null): ?string
@@ -131,10 +129,7 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
             $linkInformation['pagetype'] = $pageResult->getPageType();
         }
 
-        /** @var LinkService $linkService */
-        $linkService = GeneralUtility::makeInstance(LinkService::class);
-
-        return $linkService->asString($linkInformation);
+        return $this->linkService->asString($linkInformation);
     }
 
     private function informUserOfChange(string $url, int $id, string $type, string $internalResourceName): void
@@ -157,9 +152,7 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
             true
         );
 
-        /** @var FlashMessageService $flashMessageService */
-        $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
-        $messageQueue = $flashMessageService->getMessageQueueByIdentifier();
+        $messageQueue = $this->flashMessageService->getMessageQueueByIdentifier();
         $messageQueue->addMessage($message);
     }
 
@@ -180,11 +173,9 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
 
     private function getMatchingSiteRouteResult(ServerRequest $fakeHttpRequest): ?SiteRouteResult
     {
-        /** @var SiteMatcher $matcher */
-        $matcher = GeneralUtility::makeInstance(SiteMatcher::class);
         /** @var SiteRouteResult $siteRouteResult */
         /** @psalm-suppress InternalMethod */
-        $siteRouteResult = $matcher->matchRequest($fakeHttpRequest);
+        $siteRouteResult = $this->siteMatcher->matchRequest($fakeHttpRequest);
         /** @psalm-suppress UndefinedInterfaceMethod */
         $site = $siteRouteResult->getSite();
 
@@ -240,7 +231,7 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
                 $fileResource->getName()
             );
 
-            return GeneralUtility::makeInstance(LinkService::class)->asString([
+            return $this->linkService->asString([
                 'type' => LinkService::TYPE_FILE,
                 'file' => $fileResource
             ]);
@@ -272,7 +263,7 @@ class UrlParser implements SingletonInterface, LoggerAwareInterface
                 $folderResource->getName()
             );
 
-            return GeneralUtility::makeInstance(LinkService::class)->asString([
+            return $this->linkService->asString([
                 'type' => LinkService::TYPE_FOLDER,
                 'folder' => $folderResource
             ]);

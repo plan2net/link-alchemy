@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Plan2net\LinkAlchemy\Hooks\DataHandlerHook;
 use Plan2net\LinkAlchemy\Service\UrlParser;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
 final class DataHandlerHookTest extends UnitTestCase
@@ -57,8 +58,7 @@ final class DataHandlerHookTest extends UnitTestCase
         $mockedUrlParser->expects($this->once())->method('parse');
         $mockedDataHandler = $this->getAccessibleMock(DataHandler::class, null, [], '', false);
 
-        $subject = $this->getAccessibleMock(DataHandlerHook::class, null, [], '', false);
-        $subject->_set('urlParser', $mockedUrlParser);
+        $subject = new DataHandlerHook($mockedUrlParser, $this->createStub(SiteFinder::class));
 
         $fields = [
             'field_1' => 'http://domain.tld/fo'

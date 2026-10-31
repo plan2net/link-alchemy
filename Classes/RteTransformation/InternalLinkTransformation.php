@@ -10,11 +10,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class InternalLinkTransformation
 {
-    private UrlParser $urlParser;
-
-    public function __construct()
-    {
-        $this->urlParser = GeneralUtility::makeInstance(UrlParser::class);
+    public function __construct(
+        private readonly UrlParser $urlParser,
+    ) {
     }
 
     /**

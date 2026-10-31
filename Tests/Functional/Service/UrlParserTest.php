@@ -7,7 +7,6 @@ namespace Plan2net\LinkAlchemy\Tests\Functional\Service;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Plan2net\LinkAlchemy\Service\UrlParser;
-use Psr\Log\NullLogger;
 use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
@@ -60,9 +59,6 @@ final class UrlParserTest extends FunctionalTestCase
 
     private function urlParser(): UrlParser
     {
-        $urlParser = new UrlParser();
-        $urlParser->setLogger(new NullLogger());
-
-        return $urlParser;
+        return $this->get(UrlParser::class);
     }
 }

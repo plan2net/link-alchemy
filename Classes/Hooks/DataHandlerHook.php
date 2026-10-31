@@ -9,18 +9,14 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\SiteFinder;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
 class DataHandlerHook
 {
-    protected UrlParser $urlParser;
-    protected SiteFinder $siteFinder;
-
-    public function __construct()
-    {
-        $this->urlParser = GeneralUtility::makeInstance(UrlParser::class);
-        $this->siteFinder = GeneralUtility::makeInstance(SiteFinder::class);
+    public function __construct(
+        protected readonly UrlParser $urlParser,
+        protected readonly SiteFinder $siteFinder,
+    ) {
     }
 
     /**
