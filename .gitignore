@@ -1,1 +1,7 @@
 .idea/
+/vendor/
+/composer.lock
+# Created by `composer test:e2e:seed`
+/config/
+/public/
+/var/

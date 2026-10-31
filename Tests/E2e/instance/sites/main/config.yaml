@@ -1,0 +1,13 @@
+rootPageId: 1
+# Fake host: the tests only resolve links to it, they never open them
+base: 'https://link-alchemy.example/'
+identifier: main
+languages:
+  -
+    languageId: 0
+    title: English
+    navigationTitle: English
+    enabled: true
+    base: /
+    locale: en_US.UTF-8
+    flag: us

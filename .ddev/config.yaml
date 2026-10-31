@@ -1,0 +1,12 @@
+name: link-alchemy
+# Not "typo3", so ddev does not overwrite config/system/additional.php
+type: php
+docroot: public
+php_version: "8.3"
+webserver_type: nginx-fpm
+xdebug_enabled: false
+# The tests use SQLite
+omit_containers: [db]
+composer_version: "2"
+web_environment:
+    - TYPO3_CONTEXT=Testing

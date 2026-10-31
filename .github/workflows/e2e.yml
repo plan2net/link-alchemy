@@ -1,0 +1,117 @@
+name: e2e
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: e2e (typo3 ${{ matrix.typo3 }}, php ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        typo3: ['12.4', '13.4', '14']
+        php: ['8.3', '8.5']
+        exclude:
+          # TYPO3 12.4 does not support PHP 8.5
+          - typo3: '12.4'
+            php: '8.5'
+    env:
+      PHP_VERSION: ${{ matrix.php }}
+      # Every free 12.4 release has security advisories; fine for a throwaway test instance
+      COMPOSER_NO_BLOCKING: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo, pdo_sqlite, intl
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: Tests/E2e/package-lock.json
+
+      - name: Install beside TYPO3 ${{ matrix.typo3 }}
+        run: |
+          # QA tools are not needed here and can block the TYPO3 version
+          composer remove --dev --no-update --no-interaction \
+            vimeo/psalm friendsofphp/php-cs-fixer slevomat/coding-standard squizlabs/php_codesniffer
+          composer require --dev --no-update --no-interaction \
+            "typo3/cms-core:^${{ matrix.typo3 }}" \
+            "typo3/cms-backend:^${{ matrix.typo3 }}" \
+            "typo3/cms-extbase:^${{ matrix.typo3 }}" \
+            "typo3/cms-fluid-styled-content:^${{ matrix.typo3 }}" \
+            "typo3/cms-frontend:^${{ matrix.typo3 }}" \
+            "typo3/cms-install:^${{ matrix.typo3 }}" \
+            "typo3/cms-rte-ckeditor:^${{ matrix.typo3 }}"
+          composer update --no-interaction --no-progress --with-all-dependencies
+
+      - run: composer test:e2e:seed
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('Tests/E2e/package-lock.json') }}
+
+      - name: Install the suite
+        working-directory: Tests/E2e
+        run: npm ci
+
+      - name: Typecheck the suite
+        working-directory: Tests/E2e
+        run: npm run typecheck
+
+      - name: Install the browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        working-directory: Tests/E2e
+        run: npx playwright install chromium
+
+      - name: Serve the instance
+        working-directory: Tests/E2e
+        run: |
+          # PHP in the container runs as a different user and must write here
+          chmod -R a+rwX ../../var ../../config ../../public/fileadmin
+          docker compose up --detach --wait
+
+      - name: Run the suite
+        working-directory: Tests/E2e
+        run: npx playwright test
+        env:
+          TYPO3_BASE_URL: http://127.0.0.1:8321
+
+      - name: What the webserver said
+        if: ${{ failure() }}
+        working-directory: Tests/E2e
+        run: |
+          docker compose logs --no-color web
+          tail -n 40 ../../var/log/*.log || true
+
+      - name: Send the webserver away
+        if: ${{ !cancelled() }}
+        working-directory: Tests/E2e
+        run: docker compose down --volumes
+
+      - name: Playwright report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report-typo3-${{ matrix.typo3 }}-php-${{ matrix.php }}
+          path: Tests/E2e/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
