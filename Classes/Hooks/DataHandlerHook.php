@@ -13,89 +13,76 @@ use TYPO3\CMS\Core\LinkHandling\TypoLinkCodecService;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
-class DataHandlerHook
+final class DataHandlerHook
 {
     public function __construct(
-        protected readonly LinkResolver $linkResolver,
-        protected readonly ChangeNotifier $changeNotifier,
-        protected readonly SiteFinder $siteFinder,
-        protected readonly TypoLinkCodecService $typoLinkCodecService,
+        private readonly LinkResolver $linkResolver,
+        private readonly ChangeNotifier $changeNotifier,
+        private readonly SiteFinder $siteFinder,
+        private readonly TypoLinkCodecService $typoLinkCodecService,
     ) {
     }
 
     /**
-     * @param string     $status
-     * @param string     $table
-     * @param string|int $id
-     *
-     * @psalm-suppress PossiblyUnusedParam
+     * @psalm-suppress UnusedParam
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName
-    public function processDatamap_postProcessFieldArray($status, $table, $id, array &$fieldArray, DataHandler $parentObject): void
+    public function processDatamap_postProcessFieldArray(string $status, string $table, int|string $id, array &$fieldArray, DataHandler $dataHandler): void
     {
-        foreach ($fieldArray as $fieldName => $fieldValue) {
-            if (!$this->fieldShouldBeProcessed($table, $fieldName, $fieldValue)) {
+        foreach ($fieldArray as $field => $value) {
+            if (!$this->isLinkField($table, $field) || !is_string($value)) {
                 continue;
             }
 
-            $typoLink = $this->typoLinkCodecService->decode($fieldValue);
-            $url = $typoLink['url'];
-            if (str_starts_with($url, '/')) {
-                $url = rtrim($this->getSiteBaseUrl($table, $id) ?? '', '/') . $url;
+            $typoLink = $this->typoLinkCodecService->decode($value);
+            $url = $this->absoluteUrl($typoLink['url'], $table, $id);
+            if ($url === null) {
+                continue;
             }
 
             $link = $this->linkResolver->resolve($url);
-            if ($link !== null) {
-                $fieldArray[$fieldName] = $this->typoLinkCodecService->encode(['url' => $link->uri] + $typoLink);
-                $this->changeNotifier->notify($url, $link);
+            if ($link === null) {
+                continue;
             }
+
+            $fieldArray[$field] = $this->typoLinkCodecService->encode(['url' => $link->uri] + $typoLink);
+            $this->changeNotifier->notify($url, $link);
         }
     }
 
-    protected function fieldShouldBeProcessed(string $tableName, string $fieldName, $fieldValue): bool
+    private function isLinkField(string $table, string $field): bool
     {
-        if (empty($fieldValue) || !is_string($fieldValue)) {
-            return false;
-        }
-
-        if (!isset($GLOBALS['TCA'][$tableName])) {
-            return false;
-        }
-        if (!isset($GLOBALS['TCA'][$tableName]['columns'][$fieldName])) {
-            return false;
-        }
-
-        if (($GLOBALS['TCA'][$tableName]['columns'][$fieldName]['config']['type'] ?? '') === 'link') {
-            $fieldValue = trim($fieldValue);
-            if (str_starts_with($fieldValue, 'http') || str_starts_with($fieldValue, '/')) {
-                return true;
-            }
-        }
-
-        return false;
+        return ($GLOBALS['TCA'][$table]['columns'][$field]['config']['type'] ?? '') === 'link';
     }
 
-    protected function getSiteBaseUrl(string $table, int|string $uid): ?string
+    private function absoluteUrl(string $url, string $table, int|string $id): ?string
     {
-        if (!MathUtility::canBeInterpretedAsInteger($uid)) {
+        if (str_starts_with($url, 'http')) {
+            return $url;
+        }
+
+        if (!str_starts_with($url, '/')) {
             return null;
         }
 
-        if ($table === 'pages') {
-            $pid = $uid;
-        } else {
-            $record = BackendUtility::getRecord($table, $uid, 'pid');
-            if (isset($record['pid'])) {
-                $pid = $record['pid'];
-            } else {
-                return null;
-            }
+        $baseUrl = $this->siteBaseUrl($table, $id);
+
+        return $baseUrl === null ? null : rtrim($baseUrl, '/') . $url;
+    }
+
+    private function siteBaseUrl(string $table, int|string $id): ?string
+    {
+        if (!MathUtility::canBeInterpretedAsInteger($id)) {
+            return null;
+        }
+
+        $pageId = $table === 'pages' ? (int)$id : (int)(BackendUtility::getRecord($table, $id, 'pid')['pid'] ?? 0);
+        if ($pageId === 0) {
+            return null;
         }
 
         try {
-            $site = $this->siteFinder->getSiteByPageId($pid);
-
-            return (string)$site->getBase();
+            return (string)$this->siteFinder->getSiteByPageId($pageId)->getBase();
         } catch (SiteNotFoundException) {
             return null;
         }
