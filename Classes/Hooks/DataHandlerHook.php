@@ -9,6 +9,7 @@ use Plan2net\LinkAlchemy\LinkResolver;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\LinkHandling\TypoLinkCodecService;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\MathUtility;
 
@@ -18,6 +19,7 @@ class DataHandlerHook
         protected readonly LinkResolver $linkResolver,
         protected readonly ChangeNotifier $changeNotifier,
         protected readonly SiteFinder $siteFinder,
+        protected readonly TypoLinkCodecService $typoLinkCodecService,
     ) {
     }
 
@@ -36,14 +38,15 @@ class DataHandlerHook
                 continue;
             }
 
-            $url = explode(' ', trim($fieldValue))[0];
+            $typoLink = $this->typoLinkCodecService->decode($fieldValue);
+            $url = $typoLink['url'];
             if (str_starts_with($url, '/')) {
                 $url = rtrim($this->getSiteBaseUrl($table, $id) ?? '', '/') . $url;
             }
 
             $link = $this->linkResolver->resolve($url);
             if ($link !== null) {
-                $fieldArray[$fieldName] = $link->uri;
+                $fieldArray[$fieldName] = $this->typoLinkCodecService->encode(['url' => $link->uri] + $typoLink);
                 $this->changeNotifier->notify($url, $link);
             }
         }

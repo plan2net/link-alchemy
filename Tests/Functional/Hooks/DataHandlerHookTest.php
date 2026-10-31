@@ -37,6 +37,14 @@ final class DataHandlerHookTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function keepsTargetClassAndTitleOfLink(): void
+    {
+        $this->save(['header_link' => 'https://link-alchemy.example/about _blank button "About us"']);
+
+        self::assertSame('t3://page?uid=2 _blank button "About us"', BackendUtility::getRecord('tt_content', 1)['header_link']);
+    }
+
+    #[Test]
     public function leavesOtherFieldsAlone(): void
     {
         $this->save(['header' => 'https://link-alchemy.example/about']);
