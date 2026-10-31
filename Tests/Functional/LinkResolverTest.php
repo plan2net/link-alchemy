@@ -24,6 +24,7 @@ final class LinkResolverTest extends FunctionalTestCase
             'folder' => ['https://link-alchemy.example/fileadmin/downloads/', 't3://folder?storage=1&identifier=%2Fdownloads%2F'],
             'foreign host' => ['https://elsewhere.example/about', null],
             'unknown path' => ['https://link-alchemy.example/nowhere', null],
+            'deleted page' => ['https://link-alchemy.example/gone', null],
             'mail' => ['mailto:someone@example.com', null],
             'internal link' => ['t3://page?uid=2', null],
         ];
