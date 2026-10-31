@@ -37,6 +37,14 @@ final class DataHandlerHookTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function savesPathInLinkFieldOfNewRecordAsPageLink(): void
+    {
+        $dataHandler = $this->process(['NEW1' => ['pid' => 1, 'CType' => 'text', 'header_link' => '/about']]);
+
+        self::assertSame('t3://page?uid=2', BackendUtility::getRecord('tt_content', $dataHandler->substNEWwithIDs['NEW1'])['header_link']);
+    }
+
+    #[Test]
     public function keepsTargetClassAndTitleOfLink(): void
     {
         $this->save(['header_link' => 'https://link-alchemy.example/about _blank button "About us"']);
@@ -65,9 +73,19 @@ final class DataHandlerHookTest extends FunctionalTestCase
      */
     private function save(array $fields): void
     {
+        $this->process([1 => $fields]);
+    }
+
+    /**
+     * @param array<int|string, array<string, int|string>> $records
+     */
+    private function process(array $records): DataHandler
+    {
         $dataHandler = $this->get(DataHandler::class);
-        $dataHandler->start(['tt_content' => [1 => $fields]], []);
+        $dataHandler->start(['tt_content' => $records], []);
         $dataHandler->process_datamap();
         self::assertSame([], $dataHandler->errorLog);
+
+        return $dataHandler;
     }
 }

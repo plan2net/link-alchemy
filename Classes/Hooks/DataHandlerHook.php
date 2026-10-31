@@ -35,7 +35,7 @@ final class DataHandlerHook
             }
 
             $typoLink = $this->typoLinkCodecService->decode($value);
-            $url = $this->absoluteUrl($typoLink['url'], $table, $id);
+            $url = $this->absoluteUrl($typoLink['url'], $table, $id, $fieldArray);
             if ($url === null) {
                 continue;
             }
@@ -55,7 +55,7 @@ final class DataHandlerHook
         return ($GLOBALS['TCA'][$table]['columns'][$field]['config']['type'] ?? '') === 'link';
     }
 
-    private function absoluteUrl(string $url, string $table, int|string $id): ?string
+    private function absoluteUrl(string $url, string $table, int|string $id, array $fieldArray): ?string
     {
         if (str_starts_with($url, 'http')) {
             return $url;
@@ -65,18 +65,27 @@ final class DataHandlerHook
             return null;
         }
 
-        $baseUrl = $this->siteBaseUrl($table, $id);
+        $baseUrl = $this->siteBaseUrl($this->pageId($table, $id, $fieldArray));
 
         return $baseUrl === null ? null : rtrim($baseUrl, '/') . $url;
     }
 
-    private function siteBaseUrl(string $table, int|string $id): ?string
+    private function pageId(string $table, int|string $id, array $fieldArray): int
     {
+        // A new record has no uid yet, but DataHandler has already resolved its pid
         if (!MathUtility::canBeInterpretedAsInteger($id)) {
-            return null;
+            return (int)($fieldArray['pid'] ?? 0);
         }
 
-        $pageId = $table === 'pages' ? (int)$id : (int)(BackendUtility::getRecord($table, $id, 'pid')['pid'] ?? 0);
+        if ($table === 'pages') {
+            return (int)$id;
+        }
+
+        return (int)(BackendUtility::getRecord($table, $id, 'pid')['pid'] ?? 0);
+    }
+
+    private function siteBaseUrl(int $pageId): ?string
+    {
         if ($pageId === 0) {
             return null;
         }
