@@ -6,6 +6,13 @@ The `link_alchemy` extension rewrites absolute links to internal pages, files an
 (`t3://page...`, `t3://file...`, `t3://folder...`) when a record is saved. It works on TCA `type=link` fields
 and on rich text fields.
 
+## How it works
+
+On every save, the extension sends each absolute link to the link resolver and keeps only the links it can turn
+into a page, file or folder.
+
+![How link_alchemy works](Documentation/Images/how-it-works.png)
+
 ## Installation and configuration
 
 To install the extension, use Composer:

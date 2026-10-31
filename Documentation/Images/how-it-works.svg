@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 692" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="how-it-works-title how-it-works-desc" id="how-it-works-root">
+      <title id="how-it-works-title">How link_alchemy works</title>
+      <desc id="how-it-works-desc">When an editor saves a record, the DataHandler hook passes absolute links from link fields and rich text to the link resolver, which turns links to pages, files and folders into t3:// links and leaves all other links unchanged.</desc>
+      <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
+      #how-it-works-root { font-family: 'Geist', system-ui, sans-serif; color: #1a1a1a; }
+      #how-it-works-root .diagram-container { width: 100%; overflow-x: auto; }</style>
+        <marker id="how-it-works-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#737373"/></marker>
+        <marker id="how-it-works-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#ff8700"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#ffffff"/>
+
+      <!-- Arrows first, behind the nodes -->
+      <line x1="500" y1="84" x2="500" y2="124" stroke="#737373" stroke-width="1.4" marker-end="url(#how-it-works-arrow)"/>
+      <path d="M470 184 V204 Q470 212 462 212 H308 Q300 212 300 220 V232" fill="none" stroke="#737373" stroke-width="1.4" marker-end="url(#how-it-works-arrow)"/>
+      <path d="M530 184 V204 Q530 212 538 212 H692 Q700 212 700 220 V232" fill="none" stroke="#737373" stroke-width="1.4" marker-end="url(#how-it-works-arrow)"/>
+      <path d="M300 296 V320 Q300 328 308 328 H462 Q470 328 470 336 V360" fill="none" stroke="#737373" stroke-width="1.4" marker-end="url(#how-it-works-arrow)"/>
+      <path d="M700 296 V320 Q700 328 692 328 H538 Q530 328 530 336 V360" fill="none" stroke="#737373" stroke-width="1.4" marker-end="url(#how-it-works-arrow)"/>
+      <path d="M440 420 V440 Q440 448 432 448 H228 Q220 448 220 456 V480" fill="none" stroke="#ff8700" stroke-width="1.6" marker-end="url(#how-it-works-arrow-accent)"/>
+      <line x1="500" y1="420" x2="500" y2="480" stroke="#ff8700" stroke-width="1.6" marker-end="url(#how-it-works-arrow-accent)"/>
+      <path d="M560 420 V440 Q560 448 568 448 H772 Q780 448 780 456 V480" fill="none" stroke="#737373" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#how-it-works-arrow)"/>
+      <line x1="260" y1="540" x2="260" y2="600" stroke="#ff8700" stroke-width="1.6" marker-end="url(#how-it-works-arrow-accent)"/>
+      <line x1="460" y1="540" x2="460" y2="600" stroke="#ff8700" stroke-width="1.6" marker-end="url(#how-it-works-arrow-accent)"/>
+
+      <!-- Arrow labels -->
+      <rect x="336" y="190" width="98" height="16" rx="2" fill="#ffffff"/>
+      <text x="385" y="202" fill="#555555" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.1em">LINK FIELD</text>
+      <rect x="566" y="190" width="98" height="16" rx="2" fill="#ffffff"/>
+      <text x="615" y="202" fill="#555555" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.1em">RICH TEXT</text>
+      <rect x="294" y="426" width="72" height="16" rx="2" fill="#ffffff"/>
+      <text x="330" y="438" fill="#555555" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.1em">PAGE</text>
+      <rect x="508" y="456" width="120" height="16" rx="2" fill="#ffffff"/>
+      <text x="512" y="468" fill="#555555" font-size="11" font-family="'Geist Mono', monospace" letter-spacing="0.1em">FILE OR FOLDER</text>
+      <rect x="626" y="426" width="88" height="16" rx="2" fill="#ffffff"/>
+      <text x="670" y="438" fill="#555555" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.1em">NO MATCH</text>
+
+      <!-- Start -->
+      <rect x="370" y="32" width="260" height="52" rx="20" fill="#f4f4f4" stroke="#b3b3b3" stroke-width="1"/>
+      <text x="500" y="56" fill="#1a1a1a" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Editor saves a record</text>
+      <text x="500" y="74" fill="#555555" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">TYPO3 backend</text>
+
+      <!-- Hook -->
+      <rect x="330" y="124" width="340" height="60" rx="6" fill="#ffffff" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="500" y="150" fill="#1a1a1a" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">DataHandlerHook</text>
+      <text x="500" y="170" fill="#555555" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">runs before unchanged fields are dropped</text>
+
+      <!-- Link field -->
+      <rect x="140" y="232" width="320" height="64" rx="6" fill="#ffffff" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="300" y="258" fill="#1a1a1a" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Link field</text>
+      <text x="300" y="280" fill="#555555" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">/about → https://site/about</text>
+
+      <!-- Rich text field -->
+      <rect x="540" y="232" width="320" height="64" rx="6" fill="#ffffff" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="700" y="258" fill="#1a1a1a" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Rich text field</text>
+      <text x="700" y="280" fill="#555555" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">every &lt;a href="https://…"&gt;</text>
+
+      <!-- Resolver (focal) -->
+      <rect x="350" y="360" width="300" height="60" rx="6" fill="#fff3e6" stroke="#ff8700" stroke-width="1.4"/>
+      <text x="500" y="386" fill="#1a1a1a" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">LinkResolver</text>
+      <text x="500" y="406" fill="#555555" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">site → page route → file</text>
+
+      <!-- Outcomes -->
+      <rect x="90" y="480" width="260" height="60" rx="6" fill="#ffffff" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="220" y="506" fill="#1a1a1a" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Page</text>
+      <text x="220" y="526" fill="#555555" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">t3://page?uid=2&amp;L=1</text>
+
+      <rect x="370" y="480" width="260" height="60" rx="6" fill="#ffffff" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="500" y="506" fill="#1a1a1a" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">File or folder</text>
+      <text x="500" y="526" fill="#555555" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">t3://file?uid=1</text>
+
+      <rect x="650" y="480" width="260" height="60" rx="20" fill="#f4f4f4" stroke="#b3b3b3" stroke-width="1"/>
+      <text x="780" y="506" fill="#1a1a1a" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Value stays as it is</text>
+      <text x="780" y="526" fill="#555555" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">other host, unknown path</text>
+
+      <!-- Result (focal) -->
+      <rect x="180" y="600" width="360" height="60" rx="20" fill="#fff3e6" stroke="#ff8700" stroke-width="1.4"/>
+      <text x="360" y="626" fill="#1a1a1a" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Link saved as t3:// link</text>
+      <text x="360" y="646" fill="#555555" font-size="12" font-family="'Geist Mono', monospace" text-anchor="middle">target, class, title kept · editor told</text>
+    </svg>
