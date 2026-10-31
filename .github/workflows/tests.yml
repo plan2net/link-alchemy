@@ -20,12 +20,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        typo3: ['12.4', '13.4', '14']
-        php: ['8.3', '8.5']
-        exclude:
-          # TYPO3 12.4 does not support PHP 8.5
-          - typo3: '12.4'
-            php: '8.5'
+        # The lowest and highest PHP each TYPO3 version supports
+        include:
+          - { typo3: '12.4', php: '8.1' }
+          - { typo3: '12.4', php: '8.4' }
+          - { typo3: '13.4', php: '8.2' }
+          - { typo3: '13.4', php: '8.5' }
+          - { typo3: '14', php: '8.2' }
+          - { typo3: '14', php: '8.5' }
     env:
       PHP_VERSION: ${{ matrix.php }}
       # Every free 12.4 release has security advisories; fine for a throwaway test instance
