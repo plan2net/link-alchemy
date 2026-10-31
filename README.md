@@ -2,7 +2,9 @@
 
 ## What does it do?
 
-The `link_alchemy` extension rewrites external links in TCA `type=link` and RTE text fields that refer to internal TYPO3 pages or files. These links are converted to internal TYPO3 links (`t3://page...`, `t3://file...`).
+The `link_alchemy` extension rewrites absolute links to internal pages, files and folders into TYPO3 links
+(`t3://page...`, `t3://file...`, `t3://folder...`) when a record is saved. It works on TCA `type=link` fields
+and on rich text fields.
 
 ## Installation and configuration
 
@@ -12,49 +14,39 @@ To install the extension, use Composer:
 composer require plan2net/link-alchemy
 ```
 
-No configuration is required. The extension automatically hooks into the DataHandler for TCA fields and into the RTE content transformation process.
+No configuration is required.
 
 ## Compatibility
 
 Versions 12.0.0 and higher are compatible with the corresponding TYPO3 versions.
 
-If you already overwrite the class `RteHtmlParser` in your project, you may need to adjust the XCLASS configuration in `ext_localconf.php`.
-
 ## Usage
 
-The extension automatically hooks into the RTE content transformation process. No additional setup is required. When RTE content is processed, external links that refer to internal pages or files will be rewritten to use TYPO3's internal link format.
+Save a record. Links in link fields and in rich text that point to a page, file or folder of one of your sites
+are rewritten, and the editor sees a message about each change. Target, class and title of a link field stay as
+they are. Paths like `/about` in link fields are resolved against the site of the record.
 
 ## Example
-
-Here is an example of how the extension transforms a link in an RTE text field:
 
 - **Before**: `<a href="https://example.com/internal-page">Link</a>`
 - **After**: `<a href="t3://page?uid=123">Link</a>`
 
-This ensures that links are correctly handled within the TYPO3 CMS environment, providing better integration and consistency.
-
 ## Internals
 
-### `Plan2net\LinkAlchemy\Xclass\RteHtmlParser`
+- `Plan2net\LinkAlchemy\Hooks\DataHandlerHook` finds link and rich text fields in the data being saved, rewrites
+  their links and tells the editor.
+- `Plan2net\LinkAlchemy\LinkResolver` turns one absolute URL into a `t3://` link, or `null` if it does not point
+  to a page, file or folder of a site. It has no side effects and needs no backend user.
 
-This class extends the core `RteHtmlParser` to include custom transformations for internal links.
+## Tests
 
-### `Plan2net\LinkAlchemy\Hooks\DataHandlerHook`
-
-This class handles the transformation of internal links within TCA `type=link` fields.
-
-### `Plan2net\LinkAlchemy\RteTransformation\InternalLinkTransformation`
-
-This class handles the transformation of internal links within the RTE content.
-
-### `Plan2net\LinkAlchemy\Service\UrlParser`
-
-This class parses the urls to internal links.
-
-## TODO
-
-- [ ] Unit-Tests for UrlParser
+```bash
+ddev composer test                               # functional tests
+ddev composer test:e2e:seed                      # set up the TYPO3 instance for the browser tests
+cd Tests/E2e && npm ci && npx playwright test    # browser tests against the real backend
+```
 
 # Acknowledgements
 
-This extension was inspired by [Georg Ringers](https://github.com/georgringer)'s uri2link extension that only transforms TCA `type=link` fields.
+This extension was inspired by [Georg Ringers](https://github.com/georgringer)'s uri2link extension that only
+transforms TCA `type=link` fields.

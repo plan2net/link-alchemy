@@ -53,6 +53,43 @@ final class DataHandlerHookTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function savesAbsoluteUrlInRichTextAsPageLink(): void
+    {
+        $this->save(['bodytext' => '<p><a href="https://link-alchemy.example/about" target="_blank">About us</a></p>']);
+
+        self::assertStringContainsString(
+            '<a href="t3://page?uid=2" target="_blank">About us</a>',
+            BackendUtility::getRecord('tt_content', 1)['bodytext'],
+        );
+    }
+
+    #[Test]
+    public function savesUnchangedRichTextWithPageLink(): void
+    {
+        $this->process([2 => ['bodytext' => '<p><a href="https://link-alchemy.example/about">About us</a></p>']]);
+
+        self::assertStringContainsString('href="t3://page?uid=2"', BackendUtility::getRecord('tt_content', 2)['bodytext']);
+    }
+
+    #[Test]
+    public function savesPathInLinkFieldOfRecordAddedAfterAnotherAsPageLink(): void
+    {
+        $dataHandler = $this->process(['NEW1' => ['pid' => -1, 'CType' => 'text', 'header_link' => '/about']]);
+
+        self::assertSame('t3://page?uid=2', BackendUtility::getRecord('tt_content', $dataHandler->substNEWwithIDs['NEW1'])['header_link']);
+    }
+
+    #[Test]
+    public function leavesHtmlWithoutRichTextEditorAlone(): void
+    {
+        $html = '<a href="https://link-alchemy.example/about">About us</a>';
+
+        $this->save(['CType' => 'html', 'bodytext' => $html]);
+
+        self::assertSame($html, BackendUtility::getRecord('tt_content', 1)['bodytext']);
+    }
+
+    #[Test]
     public function leavesOtherFieldsAlone(): void
     {
         $this->save(['header' => 'https://link-alchemy.example/about']);
