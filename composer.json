@@ -30,6 +30,9 @@
         "typo3/testing-framework": "*",
         "vimeo/psalm": "^5 || ^6"
     },
+    "conflict": {
+        "georgringer/uri2link": "*"
+    },
     "autoload": {
         "psr-4": {
             "Plan2net\\LinkAlchemy\\": "Classes/"
